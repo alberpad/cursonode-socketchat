@@ -1,5 +1,5 @@
 import { io } from '../server';
-import Usuarios from '../classes/usuarios';
+import { Usuarios } from '../classes/usuarios';
 import { crearMensaje } from '../utilidades/utilidades';
 import { IPersona } from '../types/types';
 
@@ -18,14 +18,17 @@ io.on('connection', (client: SocketIO.Socket) => {
     usuarios.agregarPersona(client.id, data.nombre, data.sala);
 
     client.broadcast.to(data.sala).emit('listaPersonas', usuarios.getPersonasPorSala(data.sala));
+    client.broadcast.to(data.sala).emit('crearMensaje', crearMensaje('Administrador', `${data.nombre} se unió`));
 
     callback(usuarios.getPersonasPorSala(data.sala));
   });
 
-  client.on('crearMensaje', (data: any) => {
-    let persona: IPersona = usuarios.getPersona(client.id);
+  client.on('crearMensaje', (data: any, callback: any) => {
+    let persona = usuarios.getPersona(client.id);
+
     let mensaje: any = crearMensaje(persona.nombre, data.mensaje);
     client.broadcast.to(persona.sala).emit('crearMensaje', mensaje);
+    callback(mensaje);
   });
 
   client.on('disconnect', () => {
@@ -34,8 +37,6 @@ io.on('connection', (client: SocketIO.Socket) => {
       .to(personaBorrada.sala)
       .emit('crearMensaje', crearMensaje('Administrador', `${personaBorrada.nombre} salió.`));
     client.broadcast.to(personaBorrada.sala).emit('listaPersonas', usuarios.getPersonasPorSala(personaBorrada.sala));
-
-    console.log('Abandonó el chat: ', personaBorrada);
   });
 
   // Mensajes privados

@@ -1,13 +1,14 @@
-import { IPersona } from '../../server/types/types';
+//import { IPersona } from '../../server/types/types';
+//import { chatjquery } from '../../public/js/socket-chat-jquery';
 
-let socket = io();
+var socket = io();
 
 const defaultLocation: string = 'index.html';
-let params = new URLSearchParams(window.location.search);
-let nombre: string | null = params.get('nombre');
-let sala: string | null = params.get('sala');
-console.log('nombre', nombre);
-console.log('sala', sala);
+// params = new URLSearchParams(window.location.search);
+var nombre: string | null = params.get('nombre');
+var sala: string | null = params.get('sala');
+// console.log('nombre', nombre);
+// console.log('sala', sala);
 //if (!params.has('nombre') || !params.has('sala')) {
 
 if (!nombre || !sala) {
@@ -24,7 +25,8 @@ let usuario = {
 socket.on('connect', function() {
   console.log('Conectado al servidor');
   socket.emit('entrarChat', usuario, function(resp: any) {
-    console.log('Usuarios conectados', resp);
+    // console.log('Usuarios conectados', resp);
+    renderizarUsuarios(resp);
   });
 });
 
@@ -47,12 +49,14 @@ socket.on('disconnect', function() {
 
 // Escuchar información
 socket.on('crearMensaje', function(mensaje: any) {
-  console.log(mensaje);
+  // console.log('Mensaje: ', mensaje);
+  renderizarMensajes(mensaje, false);
+  scrollBottom();
 });
 
 // Escuchar cuando un usuario entra o sale del chat
-socket.on('listaPersonas', function(personas: IPersona[]) {
-  console.log(personas);
+socket.on('listaPersonas', function(personas: any) {
+  renderizarUsuarios(personas);
 });
 
 // Mensajes privados

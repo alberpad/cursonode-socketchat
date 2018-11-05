@@ -1,12 +1,8 @@
 "use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-let socket = io();
+var socket = io();
 const defaultLocation = 'index.html';
-let params = new URLSearchParams(window.location.search);
-let nombre = params.get('nombre');
-let sala = params.get('sala');
-console.log('nombre', nombre);
-console.log('sala', sala);
+var nombre = params.get('nombre');
+var sala = params.get('sala');
 if (!nombre || !sala) {
     window.location.href = defaultLocation;
     throw new Error('El nombre y la sala son necesarios');
@@ -18,17 +14,18 @@ let usuario = {
 socket.on('connect', function () {
     console.log('Conectado al servidor');
     socket.emit('entrarChat', usuario, function (resp) {
-        console.log('Usuarios conectados', resp);
+        renderizarUsuarios(resp);
     });
 });
 socket.on('disconnect', function () {
     console.log('Perdimos conexión con el servidor');
 });
 socket.on('crearMensaje', function (mensaje) {
-    console.log(mensaje);
+    renderizarMensajes(mensaje, false);
+    scrollBottom();
 });
 socket.on('listaPersonas', function (personas) {
-    console.log(personas);
+    renderizarUsuarios(personas);
 });
 socket.on('mensajePrivado', function (mensaje) {
     console.log('Mensaje privado: ', mensaje);
